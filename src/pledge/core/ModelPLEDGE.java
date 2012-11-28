@@ -1,3 +1,23 @@
+/*
+ * 
+ * Author : Christopher Henard (christopher.henard@uni.lu)
+ * Date : 01/11/2012
+ * Copyright 2012 University of Luxembourg – Interdisciplinary Centre for Security Reliability and Trust (SnT)
+ * All rights reserved
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package pledge.core;
 
 import java.io.BufferedReader;
@@ -38,7 +58,9 @@ import splar.plugins.reasoners.sat.sat4j.FMReasoningWithSAT;
 import splar.plugins.reasoners.sat.sat4j.ReasoningWithSAT;
 
 /**
- *
+ * This class represents the model of the application. It contains the methods 
+ * to perform the business logic of the application: load a feature model,
+ * perform the products' prioritization, etc.
  * @author Christopher Henard
  */
 public class ModelPLEDGE extends Observable {
@@ -87,6 +109,9 @@ public class ModelPLEDGE extends Observable {
     private int nbProductsToGenerate = 10;
     private String fmPath;
 
+    /**
+     * Creates the model of the application.
+     */
     public ModelPLEDGE() {
         solver = null;
         solverIterator = null;
@@ -110,66 +135,126 @@ public class ModelPLEDGE extends Observable {
         prioritizationTechnique = prioritizationTechniques.get(0);
     }
 
+    /**
+     * Returns the format of the currently loaded feature model.
+     * @return the format of the current feature model.
+     */
     public FeatureModelFormat getFeatureModelFormat() {
         return featureModelFormat;
     }
 
+    /**
+     * Returns the name of the currently loaded feature model.
+     * @return the name of the currently loaded feature model.
+     */
     public String getFeatureModelName() {
         return featureModelName;
     }
 
+    /**
+     * Returns an indices list of the features.
+     * @return a list containing the indices of the feature model's features.
+     */
     public List<Integer> getFeaturesIntList() {
         return featuresIntList;
     }
 
+    /**
+     * returns the features' list of the feature model.
+     * @return a list of features of the feature model.
+     */
     public List<String> getFeaturesList() {
         return featuresList;
     }
 
+    /**
+     * Returns a mapping between each feature and its corresponding index.
+     * @return a map containing the index of each feature.
+     */
     public Map<String, Integer> getNamesToFeaturesInt() {
         return namesToFeaturesInt;
     }
 
+    /**
+     * Returns the constraints of the feature model.
+     * @return a list containing the constraints of the feature model.
+     */
     public List<IConstr> getFeatureModelConstraints() {
         return featureModelConstraints;
     }
 
+    /**
+     * Returns the constraints of the feature model.
+     * @return a list containing a String represent of the constraints of the feature model.
+     */
     public List<String> getFeatureModelConstraintsString() {
         return featureModelConstraintsString;
     }
 
+    /**
+     * Returns the SAT solver.
+     * @return the SAT solver asosciated to this model.
+     */
     public Solver getSolver() {
         return solver;
     }
 
+    /**
+     * Checks if the application is running.
+     * @return true if the program is running.
+     */
     public boolean isRunning() {
         return running;
     }
 
+    /**
+     * Returns the list of products currently loaded into the application.
+     * @return the generated or priotized products.
+     */
     public List<Product> getProducts() {
         return products;
     }
 
+    /**
+     * Returns the amount of time allowed for generating products.
+     * @return the amount of time in seconds allowed for generating products.
+     */
     public long getGenerationTimeMSAllowed() {
         return generationTimeMSAllowed;
     }
 
+    /**
+     * Specifies the amount of time allowed for generating products.
+     * @param generationTimeMSAllowed the amount of time in seconds allowed for generating products.
+     */
     public void setGenerationTimeMSAllowed(long generationTimeMSAllowed) {
         this.generationTimeMSAllowed = generationTimeMSAllowed;
         setChanged();
         notifyObservers();
     }
 
+    /**
+     * Returns the number of products to generate.
+     * @return an integer representing the number of products to generate.
+     */
     public int getNbProductsToGenerate() {
         return nbProductsToGenerate;
     }
 
+    /**
+     * Specifies the number of products to generate.
+     * @param nbProductsToGenerate the number of products to generate.
+     */
     public void setNbProductsToGenerate(int nbProductsToGenerate) {
         this.nbProductsToGenerate = nbProductsToGenerate;
         setChanged();
         notifyObservers();
     }
 
+    /**
+     * Specifies whether the application is running or not.
+     * @param running a boolean indicating whether the application is running or not.
+     */
     public void setRunning(boolean running) {
         this.running = running;
         if (!running) {
@@ -180,48 +265,79 @@ public class ModelPLEDGE extends Observable {
         notifyObservers();
     }
 
+    /**
+     * Specifies whether the duration of current action performed by the tool is indeterminate or not.
+     * @return true if the duration of current action performed by the tool is indeterminate.
+     */
     public boolean isIndeterminate() {
         return indeterminate;
     }
 
+    /**
+     * Return the progress of the current action performed by the tool (percentage)
+     * @return an integer representing the percentage of the current action performed.
+     */
     public int getProgress() {
         return progress;
     }
 
+    /**
+     * Specifies the progress of the current action performed by the tool (percentage)
+     * @param progress an integer representing the percentage of the current action performed.
+     */
     public void setProgress(int progress) {
         this.progress = progress;
         setChanged();
         notifyObservers();
     }
 
+    /**
+     * Specifies wether the duration of current action performed by the tool is indeterminate or not.
+     * @param indeterminate a boolean specifying wether the duration of current action performed by the tool is indeterminate or not.
+     */
     public void setIndeterminate(boolean indeterminate) {
         this.indeterminate = indeterminate;
         setChanged();
         notifyObservers();
     }
 
+    /**
+     * Returns the solver iterator that is used to generate valid products.
+     * @return the solver iterator that is used to generate valid products.
+     */
     public ISolver getSolverIterator() {
         return solverIterator;
     }
 
-    public void setSolverIterator(ISolver solverIterator) {
-        this.solverIterator = solverIterator;
-    }
-
+    /**
+     * Returns the current action performed by the tool.
+     * @return a String representing the current action performed by the tool.
+     */
     public String getCurrentAction() {
         return currentAction;
     }
 
+    /**
+     * Specifies the current action performed by the tool.
+     * @param currentAction a String representing the action which is currently performed by the tool.
+     */
     public void setCurrentAction(String currentAction) {
         this.currentAction = currentAction;
         setChanged();
         notifyObservers();
     }
 
+    /**
+     * Returns the current global action performed by the tool.
+     * @return a String representing the current global action performed by the tool.
+     */
     public String getGlobalAction() {
         return globalAction;
     }
-
+    /**
+     * Specifies the current global action performed by the tool.
+     * @param globalAction a String representing the global action which is currently performed by the tool.
+     */
     public void setGlobalAction(String globalAction) {
         this.globalAction = globalAction;
         setChanged();
@@ -240,18 +356,34 @@ public class ModelPLEDGE extends Observable {
         notifyObservers();
     }
 
+    /**
+     * Returns the core features of the feature model.
+     * @return the list of mandatory features of the feature model.
+     */
     public List<String> getCoreFeatures() {
         return coreFeatures;
     }
 
+    /**
+     * Returns the dead features of the feature model.
+     * @return the list of dead features of the feature model.
+     */
     public List<String> getDeadFeatures() {
         return deadFeatures;
     }
 
+    /**
+     * Returns the specified generation technique.
+     * @return the technique used by the tool to generate products.
+     */
     public GenerationTechnique getGenerationTechnique() {
         return generationTechnique;
     }
 
+    /**
+     * Specifies the generation technique used by the tool.
+     * @param name the name of the generation technique that has to be used to generate products.
+     */
     public void SetGenerationTechniqueByName(String name) {
         for (GenerationTechnique gt : generationTechniques) {
             if (gt.getName().equals(name)) {
@@ -262,14 +394,26 @@ public class ModelPLEDGE extends Observable {
 
     }
 
+    /**
+     * Returns the generation techniques available.
+     * @return a list containing the available generation techniques.
+     */
     public List<GenerationTechnique> getGenerationTechniques() {
         return generationTechniques;
     }
 
+    /**
+     * Returns the specified prioritization technique.
+     * @return the technique used by the tool to prioritize products.
+     */
     public PrioritizationTechnique getPrioritizationTechnique() {
         return prioritizationTechnique;
     }
 
+    /**
+     * Specifies the prioritization technique used by the tool.
+     * @param name the name of the prioritization technique that has to be used to prioritize    products.
+     */
     public void SetPrioritizationTechniqueByName(String name) {
         for (PrioritizationTechnique pt : prioritizationTechniques) {
             if (pt.getName().equals(name)) {
@@ -280,10 +424,20 @@ public class ModelPLEDGE extends Observable {
 
     }
 
+    /**
+     * Returns the prioritization techniques available.
+     * @return a list containing the available prioritization techniques.
+     */
     public List<PrioritizationTechnique> getPrioritizationTechniques() {
         return prioritizationTechniques;
     }
 
+    /**
+     * Load a feature model.
+     * @param filePath the path to the feature model file.
+     * @param format the format of the feature model.
+     * @throws Exception if the file format is incorrect.
+     */
     public void loadFeatureModel(String filePath, FeatureModelFormat format) throws Exception {
         setRunning(true);
         setIndeterminate(true);
@@ -417,6 +571,10 @@ public class ModelPLEDGE extends Observable {
         notifyObservers(featureModelConstraints);
     }
 
+    /**
+     * Generate products.
+     * @throws Exception if an error occurs during the generation.
+     */
     public void generateProducts() throws Exception {
         setRunning(true);
         setIndeterminate(false);
@@ -427,6 +585,11 @@ public class ModelPLEDGE extends Observable {
         notifyObservers();
     }
 
+    
+    /**
+     * Prioritize products.
+     * @throws Exception if an error occur while prioritizing the products.
+     */
     public void prioritizeProducts() throws Exception {
         setRunning(true);
         setIndeterminate(false);
@@ -437,6 +600,11 @@ public class ModelPLEDGE extends Observable {
         notifyObservers();
     }
 
+    /**
+     * Return the type of a given feature (i.e. core, dead or free)
+     * @param feature the name of the feature.
+     * @return a String representing the type of this feature (core, dead or free).
+     */
     public String getFeatureType(String feature) {
         if (coreFeatures.contains(feature)) {
             return CORE_FEATURE;
@@ -447,7 +615,7 @@ public class ModelPLEDGE extends Observable {
         }
     }
 
-    public Product toProduct(int[] vector) {
+    private Product toProduct(int[] vector) {
 
         Product product = new Product();
         for (int i : vector) {
@@ -456,6 +624,11 @@ public class ModelPLEDGE extends Observable {
         return product;
     }
 
+    /**
+     * returns n products obtained at random from the solver.
+     * @param count the number of products to get.
+     * @return the list of products obtained at random for the solver.
+     */
     public List<Product> getUnpredictableProducts(int count) {
         List<Product> products = new ArrayList<Product>(count);
 
@@ -499,64 +672,44 @@ public class ModelPLEDGE extends Observable {
         return products;
     }
 
+    /**
+     * Save products to a file.
+     * @param outFile the file to write the products in.
+     * @throws Exception if an error occurs while writing the products to the file.
+     */
     public void saveProducts(String outFile) throws Exception {
 
 
 
-            BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
+        BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
 
-            int featuresCount = featuresList.size();
-            for (int i = 1; i <= featuresCount; i++) {
-                out.write(i + "->" + this.featuresList.get(i-1));
-                    out.newLine();
-            }
-            for (Product product : products) {
-                int done = 0;
-                for (Integer feature : product) {
-                    out.write(""+feature);
-                    if (done < product.size()) {
-                        out.write(";");
-                    }
-                    done++;
-                }
-
-                out.newLine();
-            }
-            out.close();
-
-
-    }
-    
-    public void saveProducts2(String outFile) throws Exception {
-
-        String sout = outFile;
-        if (! outFile.endsWith("/"))
-            sout+="/";
-        int j = 1;
-        for (Product product : products) {
-
-            BufferedWriter out = new BufferedWriter(new FileWriter(sout + "product_" + j + ".config"));
-
-//            int featuresCount = featuresList.size();
-//            for (int i = 1; i <= featuresCount; i++) {
-//                out.write(i + "->" + this.featuresList.get(i - 1));
-//                out.newLine();
-//            }
-//            int done = 0;
-            for (Integer feature : product) {
-                if (feature > 0) {
-                    out.write(featuresList.get(feature - 1));
-                    out.newLine();
-                }
-
-                
-            }
-
-            out.close();
-            j++;
+        int featuresCount = featuresList.size();
+        for (int i = 1; i <= featuresCount; i++) {
+            out.write(i + "->" + this.featuresList.get(i - 1));
+            out.newLine();
         }
+        for (Product product : products) {
+            int done = 0;
+            for (Integer feature : product) {
+                out.write("" + feature);
+                if (done < product.size()) {
+                    out.write(";");
+                }
+                done++;
+            }
+
+            out.newLine();
+        }
+        out.close();
+
+
     }
 
+    /**
+     * Load products from a file.
+     * @param inFile the file to loead the products from.
+     * @throws Exception if an error occurs while reading the products file.
+     */
     public void loadProducts(String inFile) throws Exception {
         setRunning(true);
         setIndeterminate(true);
@@ -584,15 +737,18 @@ public class ModelPLEDGE extends Observable {
                     p.add(Integer.parseInt(st.nextToken()));
                 }
                 products.add(p);
-            }
-            else{
-                featuresList.add(line.substring(line.indexOf(">")+1, line.length()));
+            } else {
+                featuresList.add(line.substring(line.indexOf(">") + 1, line.length()));
             }
         }
         setRunning(false);
         setChanged();
         notifyObservers(this);
     }
+    
+    /**
+     * Quit the application.
+     */
 
     public void quit() {
         System.exit(0);

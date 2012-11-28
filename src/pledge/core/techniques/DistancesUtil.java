@@ -1,4 +1,5 @@
 /*
+ * 
  * Author : Christopher Henard (christopher.henard@uni.lu)
  * Date : 01/11/2012
  * Copyright 2012 University of Luxembourg – Interdisciplinary Centre for Security Reliability and Trust (SnT)
@@ -19,11 +20,7 @@
  */
 package pledge.core.techniques;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import pledge.core.Product;
 
@@ -35,7 +32,7 @@ import pledge.core.Product;
  */
 public class DistancesUtil {
 
-    public static double getSetBasedDistance(Product p1, Product p2, double weight) {
+    private static double getSetBasedDistance(Product p1, Product p2, double weight) {
         Set<Integer> intersection = new HashSet<Integer>(p1);
         Set<Integer> union = new HashSet<Integer>(p1);
         intersection.retainAll(p2);
@@ -46,16 +43,32 @@ public class DistancesUtil {
         return 1.0 - (intersectionSize / (intersectionSize + weight * (unionSize - intersectionSize)));
     }
 
+    /**
+     * Return the jaccard distance between two products.
+     * @param p1 the first product to consider.
+     * @param p2 the second product to consider.
+     * @return the resulting jaccard distance between p1 and p2
+     */
     public static double getJaccardDistance(Product p1, Product p2) {
         return getSetBasedDistance(p1, p2, 1.0);
     }
 
-    // Also known as Gower-Legendre.
+    /**
+     * Return the dice distance between two products.
+     * @param p1 the first product to consider.
+     * @param p2 the second product to consider.
+     * @return the resulting dice distance between p1 and p2
+     */
     public static double getDiceDistance(Product p1, Product p2) {
         return getSetBasedDistance(p1, p2, 0.5);
     }
 
-    // Also known as Sokal-Sneath.
+    /**
+     * Return the anti dice distance between two products.
+     * @param p1 the first product to consider.
+     * @param p2 the second product to consider.
+     * @return the resulting anti dice distance between p1 and p2
+     */
     public static double getAntiDiceDistance(Product p1, Product p2) {
         return getSetBasedDistance(p1, p2, 2.0);
     }

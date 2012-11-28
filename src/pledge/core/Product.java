@@ -1,4 +1,5 @@
 /*
+ * 
  * Author : Christopher Henard (christopher.henard@uni.lu)
  * Date : 01/11/2012
  * Copyright 2012 University of Luxembourg – Interdisciplinary Centre for Security Reliability and Trust (SnT)
@@ -35,30 +36,11 @@ public class Product extends HashSet<Integer> implements Serializable {
     private double coverage;
     static final long serialVersionUID = -6618469841127325812L;
     
+    /**
+     * Create a product.
+     */
     public Product() {
         super();
         coverage = 0;
-    }
-    
-    public Product(Product other) {
-        super(other);
-    }
-    
-    public double getCoverage() {
-        return coverage;
-    }
-    
-    public void setCoverage(double coverage) {
-        this.coverage = coverage;
-    }
-    
-    public int getSelectedNumber() {
-        int n = 0;
-        for (Integer i : this) {
-            if (i > 0) {
-                n++;
-            }
-        }
-        return n;
     }
 }

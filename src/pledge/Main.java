@@ -26,9 +26,15 @@ import pledge.gui.GUI;
 /**
  *
  * @author Christopher Henard
+ * 
+ * This is the main class of the application.
  */
 public class Main {
 
+    /**
+     * Entry point of the application.
+     * @param args the command line arguments.
+     */
     public static void main(String[] args) {
         try {
             new GUI();

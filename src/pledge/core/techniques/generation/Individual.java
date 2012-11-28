@@ -27,7 +27,8 @@ import pledge.core.techniques.DistancesUtil;
 import pledge.core.techniques.prioritization.PrioritizationTechnique;
 
 /**
- *
+ * This class represents an individual (evolutionary algorithms).
+ * 
  * @author Christopher Henard
  */
 public class Individual implements Comparable<Individual> {

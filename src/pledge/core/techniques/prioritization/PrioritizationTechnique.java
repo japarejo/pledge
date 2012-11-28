@@ -26,14 +26,30 @@ import pledge.core.Product;
 
 
 /**
+ * This is the interface for the products' prioritization techniques.
  *
  * @author Christopher Henard
  */
 public interface PrioritizationTechnique {
     
+    /**
+     * Returns the prioritized list of products.
+     * @param model the model of the application.
+     * @param products the list of products to prioritize.
+     * @return the prioritized list of products.
+     * @throws Exception if an error occurs during the prioritization.
+     */
     public List<Product> prioritize(ModelPLEDGE model, List<Product> products) throws Exception;
     
+    /**
+     * Return the name of this technique.
+     * @return the name of this technique.
+     */
     public String getName();
     
+    /**
+     * Return the fitness sum associated to the products.
+     * @return a double representing the fitness sum associated to the products.
+     */
     public double getFitnessSum();
 }

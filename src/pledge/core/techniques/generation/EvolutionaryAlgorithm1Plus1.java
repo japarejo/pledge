@@ -29,22 +29,31 @@ import pledge.core.techniques.prioritization.PrioritizationTechnique;
  *
  * @author Christopher Henard
  * 
- * This class represents the search-based approach
+ * This class represents a search-based approach to generate products.
  */
 public class EvolutionaryAlgorithm1Plus1 implements GenerationTechnique {
 
     public static final String NAME = "(1+1) Evolutionary Algorithm";
     private static final Random random = new Random();
 
+    /**
+     * Generate products.
+     * @param model the application's modeL
+     * @param nbProducts the number of products to generate.
+     * @param timeAllowed the time allowed in seconds to generate products.
+     * @param prioritizationTechnique the prioritization technique to use.
+     * @return a list containing the generated products.
+     * @throws Exception if a problem occurs during the generation.
+     */
     @Override
     public List<Product> generateProducts(ModelPLEDGE model, int nbProducts, long timeAllowed, PrioritizationTechnique prioritizationTechnique) throws Exception {
         long startTimeMS = System.currentTimeMillis();
         Individual indiv = new Individual(model, model.getUnpredictableProducts(nbProducts), prioritizationTechnique);
         indiv.fitnessAndOrdering();
         int nbIter = 0;
-        
+
         while (System.currentTimeMillis() - startTimeMS < timeAllowed) {
-            model.setCurrentAction("Iteration number "+ (nbIter +1));
+            model.setCurrentAction("Iteration number " + (nbIter + 1));
             Individual newIndiv = new Individual(model, indiv, prioritizationTechnique);
             newIndiv.mutate(Individual.MUTATE_WORST, model);
             newIndiv.fitnessAndOrdering();
@@ -52,11 +61,15 @@ public class EvolutionaryAlgorithm1Plus1 implements GenerationTechnique {
                 indiv = newIndiv;
             }
             nbIter++;
-            model.setProgress((int) ((System.currentTimeMillis() - startTimeMS)/(double) timeAllowed * 100.0));
+            model.setProgress((int) ((System.currentTimeMillis() - startTimeMS) / (double) timeAllowed * 100.0));
         }
         return indiv.getProducts();
     }
 
+    /**
+     * Returns the name of this technique.
+     * @return a String representing the name of this technique.
+     */
     @Override
     public String getName() {
         return NAME;

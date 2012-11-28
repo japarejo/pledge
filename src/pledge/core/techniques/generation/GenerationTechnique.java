@@ -25,12 +25,26 @@ import pledge.core.Product;
 import pledge.core.techniques.prioritization.PrioritizationTechnique;
 
 /**
- *
+ * This is the interface for the products generation technique.
+ * 
  * @author Christopher Henard
  */
 public interface GenerationTechnique {
     
+    /**
+     * Generate products.
+     * @param model the application's modeL
+     * @param nbProducts the number of products to generate.
+     * @param timeAllowed the time allowed in seconds to generate products.
+     * @param prioritizationTechnique the prioritization technique to use.
+     * @return a list containing the generated products.
+     * @throws Exception if a problem occurs during the generation.
+     */
     public List<Product> generateProducts(ModelPLEDGE model, int nbProducts, long timeAllowed, PrioritizationTechnique prioritizationTechnique) throws Exception;
     
+    /**
+     * Returns the name of this technique.
+     * @return a String representing the name of this technique.
+     */
     public String getName();
 }

@@ -39,21 +39,15 @@ import pledge.gui.views.ViewPLEDGE;
  */
 public class ViewAboutWindow extends JDialog {
 
-    /** Composants de la fenetre.*/
     private JPanel content, close;
     private JLabel icon, authors;
     private JButton closeButton;
-    /** Dimensions de la fenêtre. */
     private static final int D_WIDTH = 550, D_HEIGHT = 250;
-    /** URL vers l'image utilisée dans la fenêtre. */
     private final URL AUTHORS_URL = getClass().getResource("icons/authors.png");
     private static final String TITLE = "About PLEDGE...";
     private static final String AUTHORS = "<html><center><font size=+1><b>" + ViewPLEDGE.TITLE + "<b></font><br/><br/> <font size =-1>Christopher Henard<br/><br/> version 1 - November 2012<font size =-1></center></html>";
 
-    /**
-     * Construit la fenêtre "à propos de".
-     * @param interfaceGraphique l'interface graphique globale de l'application LHP.
-     */
+
     public ViewAboutWindow(ViewPLEDGE viewPLEDGE) {
         super(viewPLEDGE, TITLE);
         content = new JPanel(new BorderLayout());
