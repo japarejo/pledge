@@ -21,6 +21,7 @@ package pledge;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import pledge.core.ModelPLEDGE;
 import pledge.gui.GUI;
 
 /**
@@ -37,7 +38,32 @@ public class Main {
      */
     public static void main(String[] args) {
         try {
-            new GUI();
+            if (args.length == 0) {
+                new GUI();
+            } else {
+                CommandLineParser parser = new CommandLineParser(args, "PLEDGE");
+                try {
+                    
+                    parser.parseArgs();
+                    if (parser.getCommandName().equals(CommandLineParser.GENERATE)) {
+                        ModelPLEDGE model = new ModelPLEDGE();
+                        if (parser.getCommandGenerate().dimacs) {
+                            model.loadFeatureModel(parser.getCommandGenerate().fmFile, model.getFeatureModelFormat().DIMACS);
+                        } else {
+                            model.loadFeatureModel(parser.getCommandGenerate().fmFile, model.getFeatureModelFormat().SPLOT);
+                        }
+                        model.setNbProductsToGenerate(parser.getCommandGenerate().nbProds);
+                        model.setGenerationTimeMSAllowed(parser.getCommandGenerate().timeAllowed);
+                        model.generateProducts();
+                        model.saveProducts(parser.getCommandGenerate().outputFile);
+                    }
+                } catch (Exception e) {
+                    parser.printUsage();
+                }
+            }
+
+
+
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
