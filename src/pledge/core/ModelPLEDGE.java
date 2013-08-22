@@ -25,13 +25,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Set;
 import java.util.StringTokenizer;
 import org.sat4j.core.VecInt;
 import org.sat4j.minisat.SolverFactory;
@@ -48,10 +49,11 @@ import org.sat4j.specs.TimeoutException;
 import org.sat4j.tools.ModelIterator;
 import pledge.core.techniques.generation.EvolutionaryAlgorithm1Plus1;
 import pledge.core.techniques.generation.GenerationTechnique;
-import pledge.core.techniques.generation.Individual;
 import pledge.core.techniques.prioritization.PrioritizationTechnique;
 import pledge.core.techniques.prioritization.SimilarityGreedy;
 import pledge.core.techniques.prioritization.SimilarityNearOptimal;
+import splar.core.constraints.CNFClause;
+import splar.core.constraints.CNFFormula;
 import splar.core.fm.FeatureModel;
 import splar.core.fm.XMLFeatureModel;
 import splar.plugins.reasoners.sat.sat4j.FMReasoningWithSAT;
@@ -68,17 +70,20 @@ public class ModelPLEDGE extends Observable {
     private static final int SAT_TIMEOUT = 1000;
     private static final int ITERATOR_TIMEOUT = 150000;
     private static final String solverName = "MiniSAT";
-    public static final String OR = "   OR    ";
+    public static final String OR = "   OR   ";
     public static final String NOT = "! ";
     private static final IOrder order = new RandomWalkDecorator(new VarOrderHeap(new RandomLiteralSelectionStrategy()), 1);
     private static final String GLOBAL_ACTION_LOAD_FM = "Loading the Feature Model";
     private static final String GLOBAL_ACTION_LOAD_PRODUCTS = "Loading Products";
     private static final String GLOBAL_ACTION_GENERATING_PRODUCTS = "Generating products";
     private static final String GLOBAL_ACTION_PRIORITIZING_PRODUCTS = "Prioritizing products";
+    private static final String GLOBAL_ACTION_COVERAGE = "Computing the coverage";
     private static final String CURRENT_ACTION_LOAD_CONSTRAINTS = "Loading the constraints...";
     private static final String CURRENT_ACTION_EXTRACT_FEATURES = "Extracting the features...";
     private static final String CURRENT_ACTION_EXTRACT_CONSTRAINTS = "Extracting the constraints...";
     private static final String CURRENT_ACTION_FINDING_CORE_DEAD_FEATURES = "Finding core and dead features...";
+    private static final String CURRENT_ACTION_MODEL_PAIRS = "Computing the valid pairs of the model...";
+    private static final String CURRENT_ACTION_PRODUCT_PAIRS = "Computing the pairs covered by the products...";
     private static final String CORE_FEATURE = "Core";
     private static final String DEAD_FEATURE = "Dead";
     private static final String FREE_FEATURE = "Free";
@@ -92,7 +97,7 @@ public class ModelPLEDGE extends Observable {
     private List<Integer> featuresIntList;
     private List<String> featuresList;
     private Map<String, Integer> namesToFeaturesInt;
-    private List<IConstr> featureModelConstraints;
+    private List<String> featureModelConstraints;
     private List<String> featureModelConstraintsString;
     private FeatureModelFormat featureModelFormat;
     private String featureModelName;
@@ -108,6 +113,7 @@ public class ModelPLEDGE extends Observable {
     private long generationTimeMSAllowed = 60000;
     private int nbProductsToGenerate = 10;
     private String fmPath;
+    private int currentConstraint = -1;
 
     /**
      * Creates the model of the application.
@@ -118,7 +124,7 @@ public class ModelPLEDGE extends Observable {
         featuresIntList = new ArrayList<Integer>();
         featuresList = new ArrayList<String>();
         namesToFeaturesInt = new HashMap<String, Integer>();
-        featureModelConstraints = new ArrayList<IConstr>();
+        featureModelConstraints = new ArrayList<String>();
         featureModelConstraintsString = new ArrayList<String>();
         coreFeatures = new ArrayList<String>();
         deadFeatures = new ArrayList<String>();
@@ -179,7 +185,7 @@ public class ModelPLEDGE extends Observable {
      * Returns the constraints of the feature model.
      * @return a list containing the constraints of the feature model.
      */
-    public List<IConstr> getFeatureModelConstraints() {
+    public List<String> getFeatureModelConstraints() {
         return featureModelConstraints;
     }
 
@@ -334,6 +340,7 @@ public class ModelPLEDGE extends Observable {
     public String getGlobalAction() {
         return globalAction;
     }
+
     /**
      * Specifies the current global action performed by the tool.
      * @param globalAction a String representing the global action which is currently performed by the tool.
@@ -516,32 +523,133 @@ public class ModelPLEDGE extends Observable {
 
         setCurrentAction(CURRENT_ACTION_EXTRACT_CONSTRAINTS);
         setProgress(0);
-        int nConstraints = solver.nConstraints();
-        for (int i = 0; i < nConstraints; i++) {
-            IConstr constraint = solver.getIthConstr(i);
-            if (constraint != null) {
-                featureModelConstraints.add(constraint);
-                StringBuilder stringConstraint = new StringBuilder();
-                int size = constraint.size();
-                for (int j = 0; j < size; j++) {
-                    boolean negative;
-                    int literal = constraint.get(j) / 2;
-                    negative = constraint.get(j) % 2 == 1;
-                    String feature = featuresList.get(literal - 1);
-                    if (negative) {
-                        stringConstraint.append(NOT);
-                    }
-                    stringConstraint.append(feature);
-                    if (j < size - 1) {
-                        stringConstraint.append(OR);
-                    }
+        int nConstraints = 0;
+        switch (format) {
 
+            case SPLOT:
+                setIndeterminate(true);
+                FeatureModel fm = new XMLFeatureModel(filePath, XMLFeatureModel.USE_VARIABLE_NAME_AS_ID);
+                fm.loadModel();
+                ReasoningWithSAT reasonerSAT = new FMReasoningWithSAT(solverName, fm, SAT_TIMEOUT);
+                reasonerSAT.init();
+                CNFFormula formula = fm.FM2CNF();
+                nConstraints = formula.getClauses().size();
+                setIndeterminate(false);
+                int j = 0;
+
+                for (CNFClause clause : formula.getClauses()) {
+
+                    String cons = "";
+
+
+                    for (int i = 0; i < clause.getLiterals().size(); i++) {
+                        int signal = clause.getLiterals().get(i).isPositive() ? 1 : -1;
+                        int varID = reasonerSAT.getVariableIndex(clause.getLiterals().get(i).getVariable().getID());
+
+                        String f = featuresList.get(varID - 1);
+                        if (signal < 0) {
+                            f = NOT + f;
+                        }
+
+                        if (cons.equals("")) {
+                            cons += f;
+                        } else {
+                            cons += OR + f;
+                        }
+
+                    }
+                    featureModelConstraints.add(cons);
+                    featureModelConstraintsString.add(cons);
+                    setProgress((int) ((j + 1) / (double) nConstraints * 100));
+                    j++;
                 }
-                featureModelConstraintsString.add(stringConstraint.toString());
-            }
 
-            setProgress((int) ((i + 1) / (double) nConstraints * 100));
+                break;
+            case DIMACS:
+
+                BufferedReader in = new BufferedReader(new FileReader(filePath));
+                String line;
+
+                while ((line = in.readLine()) != null) {
+                    if (line.startsWith("p")) {
+                        StringTokenizer st = new StringTokenizer(line.trim(), " ");
+                        st.nextToken();
+                        st.nextToken();
+                        st.nextToken();
+                        nConstraints = Integer.parseInt(st.nextToken());
+                        break;
+
+                    }
+                }
+                in.close();
+
+                int i = 0;
+                in = new BufferedReader(new FileReader(filePath));
+                while ((line = in.readLine()) != null) {
+                    if (!line.startsWith("c") && !line.startsWith("p")) {
+                        String cons = "";
+                        StringTokenizer st = new StringTokenizer(line.trim(), " ");
+
+                        while (st.hasMoreTokens()) {
+                            int f = Integer.parseInt(st.nextToken());
+
+                            if (f != 0) {
+                                if (cons.equals("")) {
+                                    if (f > 0) {
+                                        cons += featuresList.get((f - 1));
+
+                                    } else {
+                                        cons += NOT + featuresList.get((-f) - 1);
+                                    }
+                                } else {
+                                    cons += OR;
+                                    if (f > 0) {
+                                        cons += featuresList.get((f - 1));
+
+                                    } else {
+                                        cons += NOT + featuresList.get((-f) - 1);
+                                    }
+                                }
+                            }
+
+                        }
+                        featureModelConstraints.add(cons);
+                        featureModelConstraintsString.add(cons);
+                        setProgress((int) ((i + 1) / (double) nConstraints * 100));
+                        i++;
+                    }
+                }
+                in.close();
+
+                break;
         }
+
+
+//        for (int i = 0; i < nConstraints; i++) {
+//            IConstr constraint = solver.getIthConstr(i);
+//            if (constraint != null) {
+//                featureModelConstraints.add(constraint);
+//                StringBuilder stringConstraint = new StringBuilder();
+//                int size = constraint.size();
+//                for (int j = 0; j < size; j++) {
+//                    boolean negative;
+//                    int literal = constraint.get(j) / 2;
+//                    negative = constraint.get(j) % 2 == 1;
+//                    String feature = featuresList.get(literal - 1);
+//                    if (negative) {
+//                        stringConstraint.append(NOT);
+//                    }
+//                    stringConstraint.append(feature);
+//                    if (j < size - 1) {
+//                        stringConstraint.append(OR);
+//                    }
+//                    
+//                }
+//                featureModelConstraintsString.add(stringConstraint.toString());
+//            }
+//            
+//            setProgress((int) ((i + 1) / (double) nConstraints * 100));
+//        }
 
         setCurrentAction(CURRENT_ACTION_FINDING_CORE_DEAD_FEATURES);
         setProgress(0);
@@ -565,8 +673,13 @@ public class ModelPLEDGE extends Observable {
             setProgress((int) ((n) / (double) featuresCount * 100));
         }
 
-
         setRunning(false);
+        setChanged();
+        notifyObservers(featureModelConstraints);
+    }
+    
+    public void removeConstraint(int i){
+        featureModelConstraintsString.remove(i);
         setChanged();
         notifyObservers(featureModelConstraints);
     }
@@ -585,7 +698,6 @@ public class ModelPLEDGE extends Observable {
         notifyObservers();
     }
 
-    
     /**
      * Prioritize products.
      * @throws Exception if an error occur while prioritizing the products.
@@ -598,6 +710,68 @@ public class ModelPLEDGE extends Observable {
         setRunning(false);
         setChanged();
         notifyObservers();
+    }
+
+    /**
+     * Compute the valid pairs of the FM.
+    
+     */
+    private Set<TSet> computeValidPairs() throws TimeoutException {
+        Set<TSet> pairs = new HashSet<TSet>();
+
+        List<Integer> extendedFeatures = new ArrayList<Integer>(featuresIntList.size() * 2);
+
+        for (Integer i : featuresIntList) {
+            extendedFeatures.add(i);
+            extendedFeatures.add(-i);
+        }
+
+        int size = extendedFeatures.size();
+
+        Util.nCk(size, 2, pairs, extendedFeatures, true, solver);
+
+        return pairs;
+    }
+
+    /**
+     * Compute the pairwise coverage of the products.
+     * @return the pairwise coverage of the products.
+     */
+    public String getPairwiseCoverage() throws TimeoutException {
+        setRunning(true);
+        setIndeterminate(false);
+        setGlobalAction(GLOBAL_ACTION_COVERAGE);
+        setCurrentAction(CURRENT_ACTION_PRODUCT_PAIRS);
+
+        Set<TSet> productsPairs = new HashSet<TSet>();
+
+        int i = 0;
+        for (Product p : products) {
+            setCurrentAction(CURRENT_ACTION_PRODUCT_PAIRS + " product " + i);
+            productsPairs.addAll(p.getCoveredPairs());
+            setProgress((int) (((double) i / (double) products.size()) * 100.0));
+            i++;
+        }
+
+        int d1 = productsPairs.size();
+        int d2 =  0;
+        double cov = 0;
+        if (solver != null) {
+
+            setIndeterminate(true);
+            setCurrentAction(CURRENT_ACTION_MODEL_PAIRS);
+            d2 = computeValidPairs().size();
+
+
+            cov = (double) d1 / d2 * 100.0;
+        }
+        else
+            cov = d1;
+        setRunning(false);
+        if (solver != null)
+        return "Number of valid pairs of the model: " + d2 + "\nNumber of pairs covered by the products: " + d1 + "\n\nCoverage: " + new DecimalFormat("#.##").format(cov) + "%";
+        else
+            return "Number of pairs covered by the products: " + d1 ;
     }
 
     /**
@@ -714,15 +888,15 @@ public class ModelPLEDGE extends Observable {
         setRunning(true);
         setIndeterminate(true);
         setGlobalAction(GLOBAL_ACTION_LOAD_PRODUCTS);
-        solver = null;
-        solverIterator = null;
-        featuresIntList = new ArrayList<Integer>();
-        featuresList = new ArrayList<String>();
-        namesToFeaturesInt = new HashMap<String, Integer>();
-        featureModelConstraints = new ArrayList<IConstr>();
-        featureModelConstraintsString = new ArrayList<String>();
-        coreFeatures = new ArrayList<String>();
-        deadFeatures = new ArrayList<String>();
+//        solver = null;
+//        solverIterator = null;
+//        featuresIntList = new ArrayList<Integer>();
+//        featuresList = new ArrayList<String>();
+//        namesToFeaturesInt = new HashMap<String, Integer>();
+//        featureModelConstraints = new ArrayList<String>();
+//        featureModelConstraintsString = new ArrayList<String>();
+//        coreFeatures = new ArrayList<String>();
+//        deadFeatures = new ArrayList<String>();
         BufferedReader in = new BufferedReader(new FileReader(inFile));
 
         products = new ArrayList<Product>();
@@ -738,19 +912,30 @@ public class ModelPLEDGE extends Observable {
                 }
                 products.add(p);
             } else {
-                featuresList.add(line.substring(line.indexOf(">") + 1, line.length()));
+//                featuresList.add(line.substring(line.indexOf(">") + 1, line.length()));
             }
         }
         setRunning(false);
         setChanged();
         notifyObservers(this);
     }
-    
+
     /**
      * Quit the application.
      */
-
     public void quit() {
         System.exit(0);
     }
+
+    public int getCurrentConstraint() {
+        return currentConstraint;
+    }
+
+    public void setCurrentConstraint(int currentConstraint) {
+        this.currentConstraint = currentConstraint;
+        setChanged();
+        notifyObservers();
+    }
+    
+    
 }

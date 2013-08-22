@@ -43,8 +43,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import pledge.core.ModelPLEDGE;
 import pledge.gui.controllers.ControllerCloseAbout;
+import pledge.gui.controllers.ControllerCloseEditConstraints;
+import pledge.gui.controllers.ControllerCoverage;
 import pledge.gui.controllers.ControllerDisplayAbout;
 import pledge.gui.controllers.ControllerDisplayDocumentation;
+import pledge.gui.controllers.ControllerDisplayEditConstraints;
 import pledge.gui.controllers.ControllerGenerateProducts;
 import pledge.gui.controllers.ControllerGenerationTechnique;
 import pledge.gui.controllers.ControllerLoadFeatureModel;
@@ -52,6 +55,7 @@ import pledge.gui.controllers.ControllerLoadProducts;
 import pledge.gui.controllers.ControllerPrioritizationTechnique;
 import pledge.gui.controllers.ControllerPrioritizeProducts;
 import pledge.gui.controllers.ControllerQuit;
+import pledge.gui.controllers.ControllerRemoveConstraint;
 import pledge.gui.controllers.ControllerSaveProducts;
 import pledge.gui.controllers.ControllerViewConfigurationGeneration;
 
@@ -69,6 +73,7 @@ public class ViewPLEDGE extends JFrame implements Observer {
     private static final String FILE_CHOOSER_FEATURE_MODEL_TITLE = "Load a Feature Model";
     private static final String FILE_CHOOSER_PRODUCTS_TITLE = "Load Products";
     private static final String FILE_SAVER_PRODUCTS_TITLE = "Save Products";
+    private static final String COVERAGE_TITLE = "Pairwise coverage";
     private final FileNameExtensionFilter featureModelFileFilter = new FileNameExtensionFilter("SPLOT or DIMACS Feature Models (.xml, .dimacs)", "xml", "dimacs");
     private static final String TAB_FEATURE_MODEL = "Feature Model";
     private final URL BACKGROUND_URL = getClass().getResource("icons/logo.png");
@@ -92,7 +97,11 @@ public class ViewPLEDGE extends JFrame implements Observer {
     private ControllerViewConfigurationGeneration controllerViewConfigurationGeneration;
     private ControllerGenerateProducts controllerGenerateProducts;
     private ControllerPrioritizeProducts controllerPrioritizeProducts;
+    private ControllerCoverage controllerCoverage;
     private ControllerDisplayDocumentation controllerDisplayDocumentation;
+    private ControllerDisplayEditConstraints controllerDisplayEditConstraints;
+    private ControllerCloseEditConstraints controllerCloseEditConstraints;
+    private ControllerRemoveConstraint controllerRemoveConstraint;
     // Views
     private ViewMenuBar viewMenuBar;
     private ViewConstraints viewConstraints;
@@ -105,6 +114,7 @@ public class ViewPLEDGE extends JFrame implements Observer {
     private ViewProducts viewProducts;
     private JPanel content, background;
     private ViewDocumentation viewDocumentation;
+    private ViewEditConstraints viewEditConstraints;
 
     public ViewPLEDGE() {
         super(TITLE);
@@ -128,6 +138,7 @@ public class ViewPLEDGE extends JFrame implements Observer {
         viewConfigurationGeneration = new ViewConfigurationGeneration(model, this);
         viewProducts = new ViewProducts(model);
         viewToolBar = new ViewToolBar(model);
+        viewEditConstraints = new ViewEditConstraints(model, this);
         controllerQuit = new ControllerQuit(model, this);
         controllerLoadFeatureModel = new ControllerLoadFeatureModel(model, this);
         controllerLoadProducts = new ControllerLoadProducts(model, this);
@@ -135,9 +146,14 @@ public class ViewPLEDGE extends JFrame implements Observer {
         controllerCloseAbout = new ControllerCloseAbout(this);
         controllerViewConfigurationGeneration = new ControllerViewConfigurationGeneration(this);
         controllerGenerateProducts = new ControllerGenerateProducts(model, this, viewConfigurationGeneration);
+        controllerCoverage = new ControllerCoverage(model, this);
         controllerSaveProducts = new ControllerSaveProducts(model, this);
         controllerPrioritizeProducts = new ControllerPrioritizeProducts(model, this);
         controllerDisplayDocumentation = new ControllerDisplayDocumentation(this);
+        controllerDisplayEditConstraints = new ControllerDisplayEditConstraints(this);
+        controllerCloseEditConstraints =  new ControllerCloseEditConstraints(this);
+        controllerRemoveConstraint = new ControllerRemoveConstraint(model);
+        viewEditConstraints.getCloseButton().addActionListener(controllerCloseEditConstraints );
         viewAboutWindow.getCloseButton().addActionListener(controllerCloseAbout);
         viewMenuBar.getQuit().addActionListener(controllerQuit);
         viewMenuBar.getLoadFeatureModel().addActionListener(controllerLoadFeatureModel);
@@ -147,6 +163,7 @@ public class ViewPLEDGE extends JFrame implements Observer {
         viewMenuBar.getSaveProducts().addActionListener(controllerSaveProducts);
         viewMenuBar.getPrioritize().addActionListener(controllerPrioritizeProducts);
         viewMenuBar.getDoc().addActionListener(controllerDisplayDocumentation);
+        viewMenuBar.getCoverage().addActionListener(controllerCoverage);
         viewConfigurationGeneration.getOk().addActionListener(controllerGenerateProducts);
         controllerGenerationTechnique = new ControllerGenerationTechnique(model, viewMenuBar);
         for (JRadioButtonMenuItem button : viewMenuBar.getGenerationTechniqueButtons()) {
@@ -162,6 +179,8 @@ public class ViewPLEDGE extends JFrame implements Observer {
         viewToolBar.getGenerate().addActionListener(controllerViewConfigurationGeneration);
         viewToolBar.getSaveProducts().addActionListener(controllerSaveProducts);
         viewToolBar.getPrioritize().addActionListener(controllerPrioritizeProducts);
+        viewToolBar.getAddConstraint().addActionListener(controllerDisplayEditConstraints);
+        viewToolBar.getRemoveConstraint().addActionListener(controllerRemoveConstraint);
         setJMenuBar(viewMenuBar);
         featureModelChooser = new JFileChooser();
         featureModelChooser.setMultiSelectionEnabled(false);
@@ -199,6 +218,10 @@ public class ViewPLEDGE extends JFrame implements Observer {
         setVisible(true);
 
 
+    }
+    
+    public void displayCoverage(String cov){
+        JOptionPane.showMessageDialog(this, cov, COVERAGE_TITLE, JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void displayDocumentation() {
@@ -291,6 +314,21 @@ public class ViewPLEDGE extends JFrame implements Observer {
             @Override
             public void run() {
                 viewAboutWindow.setVisible(display);
+            }
+        };
+        if (SwingUtilities.isEventDispatchThread()) {
+            code.run();
+        } else {
+            SwingUtilities.invokeLater(code);
+        }
+    }
+    
+    public void displayViewEditConstraints(final boolean display) {
+        Runnable code = new Runnable() {
+
+            @Override
+            public void run() {
+                viewEditConstraints.setVisible(display);
             }
         };
         if (SwingUtilities.isEventDispatchThread()) {

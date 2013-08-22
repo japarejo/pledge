@@ -32,7 +32,10 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import pledge.core.ModelPLEDGE;
 
 /**
@@ -40,7 +43,7 @@ import pledge.core.ModelPLEDGE;
  * @author Christopher Henard
  */
 public class ViewConstraints extends JPanel implements Observer {
-
+    
     private static final String TITLE = "CNF Constraints";
     private static final int D_WIDTH = 300;
     private static final Color GRAY = new Color(220, 220, 220);
@@ -48,8 +51,8 @@ public class ViewConstraints extends JPanel implements Observer {
     private AdapterConstraints modelAdapter;
     private JList constraintsList;
     private JScrollPane scrollPane;
-
-    public ViewConstraints(ModelPLEDGE model) {
+    
+    public ViewConstraints(final ModelPLEDGE model) {
         super(new BorderLayout());
         this.model = model;
         model.addObserver(this);
@@ -57,18 +60,28 @@ public class ViewConstraints extends JPanel implements Observer {
         constraintsList = new JList(modelAdapter);
         scrollPane = new JScrollPane(constraintsList);
         scrollPane.setPreferredSize(new Dimension(D_WIDTH, getHeight()));
-//        constraintsList.setCellRenderer(new CustomRenderer());
+        constraintsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        constraintsList.addListSelectionListener(new ListSelectionListener() {
+            
+            @Override
+            public void valueChanged(ListSelectionEvent arg) {
+                if (!arg.getValueIsAdjusting()) {
+                   model.setCurrentConstraint(constraintsList.getSelectedIndex());
+                }
+            }
+        });
+
 
         setBorder(BorderFactory.createTitledBorder(TITLE));
         add(scrollPane, BorderLayout.CENTER);
-
-
+        
+        
     }
-
+    
     @Override
     public void update(Observable o, final Object arg) {
         Runnable code = new Runnable() {
-
+            
             @Override
             public void run() {
                 if (arg != null) {
@@ -82,25 +95,4 @@ public class ViewConstraints extends JPanel implements Observer {
             SwingUtilities.invokeLater(code);
         }
     }
-//    private class CustomRenderer extends JLabel implements ListCellRenderer {
-//
-//        public CustomRenderer() {
-//            setOpaque(true);
-//        }
-//
-//        @Override
-//        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-//            // Assumes the stuff in the list has a pretty toString
-//            setText(value.toString());
-//
-//            // based on the index you set the color.  This produces the every other effect.
-//            if (index % 2 == 0) {
-//                setBackground(Color.WHITE);
-//            } else {
-//                setBackground(GRAY);
-//            }
-//
-//            return this;
-//        }
-//    }
 }

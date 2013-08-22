@@ -41,10 +41,12 @@ public class ViewToolBar extends JToolBar implements Observer {
     public static final String GENERATE = "Generate products";
     public static final String PRIORITIZE = "Prioritize products";
     public static final String STOP = "Stop the execution";
+    public static final String ADD_CONSTRAINT = "Add a constraint to the Feature Model";
+    public static final String REMOVE_CONSTRAINT = "Remove a constraint from the Feature Model";
     private ModelPLEDGE model;
     private ImageIcon loadFMIcon, loadProductsIcon, quitIcon, saveProductsIcon,
-            stopIcon, generateIcon, prioritizeIcon;
-    private JButton loadFM, loadProducts, quit, saveProducts, generate, prioritize, stop;
+            stopIcon, generateIcon, prioritizeIcon, addConstraintIcon, removeConstraintIcon;
+    private JButton loadFM, loadProducts, quit, saveProducts, generate, prioritize, stop, addConstraint, removeConstraint;
     private final URL urlLoadFM = getClass().getResource("icons/load_fm.png");
     private final URL urlLoadProducts = getClass().getResource("icons/load_products.png");
     private final URL urlQUIT = getClass().getResource("icons/exit.png");
@@ -52,6 +54,8 @@ public class ViewToolBar extends JToolBar implements Observer {
     private final URL urlGenerate = getClass().getResource("icons/generate.png");
     private final URL urlPrioritize = getClass().getResource("icons/prioritize.png");
     private final URL urlStop = getClass().getResource("icons/stop.png");
+    private final URL urlAddConstraint = getClass().getResource("icons/add.png");
+    private final URL urlRemoveConstraint = getClass().getResource("icons/remove.png");
 
     public ViewToolBar(ModelPLEDGE model) {
         super();
@@ -65,6 +69,8 @@ public class ViewToolBar extends JToolBar implements Observer {
         saveProductsIcon = new ImageIcon(urlSaveProducts);
         generateIcon = new ImageIcon(urlGenerate);
         prioritizeIcon = new ImageIcon(urlPrioritize);
+        addConstraintIcon = new ImageIcon(urlAddConstraint);
+        removeConstraintIcon = new ImageIcon(urlRemoveConstraint);
         stopIcon = new ImageIcon(urlStop);
         loadFM = new JButton(loadFMIcon);
         loadFM.setToolTipText(LOAD_FM);
@@ -87,6 +93,12 @@ public class ViewToolBar extends JToolBar implements Observer {
         stop = new JButton(stopIcon);
         stop.setToolTipText(STOP);
         stop.setFocusPainted(false);
+        addConstraint = new JButton(addConstraintIcon);
+        addConstraint.setToolTipText(ADD_CONSTRAINT);
+        addConstraint.setFocusPainted(false);
+        removeConstraint = new JButton(removeConstraintIcon);
+        removeConstraint.setToolTipText(REMOVE_CONSTRAINT);
+        removeConstraint.setFocusPainted(false);
         add(loadFM);
         add(loadProducts);
         add(quit);
@@ -95,6 +107,9 @@ public class ViewToolBar extends JToolBar implements Observer {
         add(prioritize);
         add(stop);
         add(saveProducts);
+        addSeparator();
+        add(addConstraint);
+        add(removeConstraint);
         setEnabled();
     }
 
@@ -126,6 +141,14 @@ public class ViewToolBar extends JToolBar implements Observer {
         return stop;
     }
 
+    public JButton getAddConstraint() {
+        return addConstraint;
+    }
+
+    public JButton getRemoveConstraint() {
+        return removeConstraint;
+    }
+    
     private void setEnabled() {
         Runnable code = new Runnable() {
 
@@ -137,6 +160,8 @@ public class ViewToolBar extends JToolBar implements Observer {
                 loadFM.setEnabled(!model.isRunning());
                 loadProducts.setEnabled(!model.isRunning());
                 stop.setEnabled(model.isRunning());
+                addConstraint.setEnabled(model.getSolver() != null && !model.isRunning());
+                removeConstraint.setEnabled(model.getSolver() != null && !model.isRunning() && model.getCurrentConstraint() >= 0);
             }
         };
         if (SwingUtilities.isEventDispatchThread()) {

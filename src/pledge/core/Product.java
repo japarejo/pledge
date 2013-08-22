@@ -21,7 +21,11 @@
 package pledge.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.sat4j.specs.TimeoutException;
 
 /**
  * This class represents a product (i.e. a list of features, selected or not).
@@ -35,7 +39,7 @@ public class Product extends HashSet<Integer> implements Serializable {
      * products.     */
     private double coverage;
     static final long serialVersionUID = -6618469841127325812L;
-    
+
     /**
      * Create a product.
      */
@@ -43,4 +47,15 @@ public class Product extends HashSet<Integer> implements Serializable {
         super();
         coverage = 0;
     }
+
+    public Set<TSet> getCoveredPairs() throws TimeoutException {
+
+        List<Integer> pl = new ArrayList<Integer>(this);
+        int size = size();
+        Set<TSet> pairs = new HashSet<TSet>(size * (size - 1) / 2);
+        Util.nCk(size, 2, pairs, pl, false, null);
+        return pairs;
+    }
+
+    
 }

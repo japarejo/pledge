@@ -55,13 +55,14 @@ public class ViewMenuBar extends JMenuBar implements Observer {
     public static final String PRIORITIZE = "Prioritize products";
     public static final String STOP = "Stop the execution";
     public static final String SAVE_PRODUCTS = "Save the products";
+    public static final String COMPUTE_PAIRWISE = "Compute the pairwise coverage";
     public static final String DOC = "Documentation";
     public static final String ABOUT = "About PLEDGE...";
     public static final String PRIORITIZATION_TECHNIQUE = "Prioritization technique";
     public static final String GENERATION_TECHNIQUE = "Generation technique";
     private ModelPLEDGE model;
     private JMenu file, execute, configuration, help, generationTechnique, prioritizationTechnique;
-    private JMenuItem loadFeatureModel, loadProducts, quit, generate, prioritize, stop, saveProducts, about, doc;
+    private JMenuItem loadFeatureModel, loadProducts, quit, generate, prioritize, coverage, stop, saveProducts, about, doc;
     private ImageIcon loadFMIcon, loadProductsIcon, quitIcon, saveProductsIcon,
             stopIcon, generateIcon, prioritizeIcon;
     private List<JRadioButtonMenuItem> generationTechniqueButtons = new ArrayList<JRadioButtonMenuItem>();
@@ -95,6 +96,7 @@ public class ViewMenuBar extends JMenuBar implements Observer {
         generate.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, ActionEvent.ALT_MASK));
         prioritize = new JMenuItem(PRIORITIZE, prioritizeIcon);
         prioritize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK));
+        coverage = new JMenuItem(COMPUTE_PAIRWISE);
         stop = new JMenuItem(STOP, stopIcon);
         stop.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, ActionEvent.ALT_MASK));
         saveProducts = new JMenuItem(SAVE_PRODUCTS, saveProductsIcon);
@@ -136,6 +138,7 @@ public class ViewMenuBar extends JMenuBar implements Observer {
         execute.setMnemonic(KeyEvent.VK_E);
         execute.add(generate);
         execute.add(prioritize);
+        execute.add(coverage);
         execute.add(stop);
         execute.addSeparator();
         execute.add(saveProducts);
@@ -189,6 +192,10 @@ public class ViewMenuBar extends JMenuBar implements Observer {
     public JMenuItem getDoc() {
         return doc;
     }
+
+    public JMenuItem getCoverage() {
+        return coverage;
+    }
     
     
 
@@ -230,6 +237,7 @@ public class ViewMenuBar extends JMenuBar implements Observer {
             public void run() {
                 generate.setEnabled(model.getSolver() != null &&! model.isRunning());
                 prioritize.setEnabled(model.getProducts() != null && ! model.isRunning());
+                coverage.setEnabled(model.getProducts() != null && ! model.isRunning());
                 saveProducts.setEnabled(model.getProducts() != null);
                 stop.setEnabled(model.isRunning());
                 loadFeatureModel.setEnabled(!model.isRunning());

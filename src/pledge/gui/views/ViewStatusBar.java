@@ -103,6 +103,11 @@ public class ViewStatusBar extends JPanel implements Observer {
                         int progress = model.getProgress();
                         progressBar.setValue(progress);
                     }
+                    else
+                    {
+                        progressBar.setIndeterminate(true);
+                        progressBar.setStringPainted(false);
+                    }
 
 
                 } else {
