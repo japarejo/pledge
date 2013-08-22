@@ -1,8 +1,0 @@
-pledge
-pledge.core
-pledge.core.techniques
-pledge.core.techniques.generation
-pledge.core.techniques.prioritization
-pledge.gui
-pledge.gui.controllers
-pledge.gui.views

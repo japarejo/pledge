@@ -38,7 +38,7 @@ public class AdapterConstraints extends AbstractListModel {
 
     @Override
     public int getSize() {
-        return model.getFeatureModelConstraints().size();
+        return model.getFeatureModelConstraintsString().size();
     }
 
     @Override
