@@ -12,15 +12,19 @@ public class CommandLineParser {
 
     private JCommander jCommander;
     private Generate commandGenerate;
+    private Prioritize commandPrioritize;
     private String[] args;
     public static final String GENERATE = "generate_products";
+    public static final String PRIORITIZE = "prioritize_products";
 
     public CommandLineParser(String[] args, String programName) {
         this.args = args;
 
         commandGenerate = new Generate();
+        commandPrioritize = new Prioritize();
         jCommander = new JCommander();
         jCommander.addCommand(GENERATE, commandGenerate);
+        jCommander.addCommand(PRIORITIZE, commandPrioritize);
         jCommander.setProgramName("java -jar " + programName + ".jar");
 
     }
@@ -38,6 +42,20 @@ public class CommandLineParser {
         public long timeAllowed = 60000;
         @Parameter(names = "-dimacs", description = "Specify if the FM is a dimacs one")
         public boolean dimacs = false;
+    }
+    
+    @Parameters(commandDescription = "Prioritize products")
+    public class Prioritize {
+
+        @Parameter(names = "-i", description = "Input products file", required = true)
+        public String inputFile;
+        
+        @Parameter(names = "-t", description = "technique (greedy or nearoptimal)", required = true)
+        public String technique;
+        
+        @Parameter(names = "-o", description = "Output file", required = true)
+        public String outputFile;
+
     }
 
     public Generate getCommandGenerate() {

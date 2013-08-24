@@ -50,6 +50,7 @@ public class ViewMenuBar extends JMenuBar implements Observer {
     private static final String HELP = "Help";
     private static final String LOAD_FEATURE_MODEL = "Load a Feature Model...";
     private static final String LOAD_PRODUCTS = "Load Products...";
+    private static final String LOAD_PRODUCTS_FM = "Load Products after Feature Model...";
     private static final String QUIT = "Quit";
     public static final String GENERATE = "Generate products";
     public static final String PRIORITIZE = "Prioritize products";
@@ -62,7 +63,7 @@ public class ViewMenuBar extends JMenuBar implements Observer {
     public static final String GENERATION_TECHNIQUE = "Generation technique";
     private ModelPLEDGE model;
     private JMenu file, execute, configuration, help, generationTechnique, prioritizationTechnique;
-    private JMenuItem loadFeatureModel, loadProducts, quit, generate, prioritize, coverage, stop, saveProducts, about, doc;
+    private JMenuItem loadFeatureModel, loadProducts, loadProductsFM, quit, generate, prioritize, coverage, stop, saveProducts, about, doc;
     private ImageIcon loadFMIcon, loadProductsIcon, quitIcon, saveProductsIcon,
             stopIcon, generateIcon, prioritizeIcon;
     private List<JRadioButtonMenuItem> generationTechniqueButtons = new ArrayList<JRadioButtonMenuItem>();
@@ -90,6 +91,8 @@ public class ViewMenuBar extends JMenuBar implements Observer {
         loadFeatureModel.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
         loadProducts = new JMenuItem(LOAD_PRODUCTS, loadProductsIcon);
         loadProducts.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
+        loadProductsFM = new JMenuItem(LOAD_PRODUCTS_FM);
+        loadProductsFM.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.CTRL_MASK));
         quit = new JMenuItem(QUIT, quitIcon);
         quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
         generate = new JMenuItem(GENERATE, generateIcon);
@@ -131,6 +134,7 @@ public class ViewMenuBar extends JMenuBar implements Observer {
         file.setMnemonic(KeyEvent.VK_F);
         file.add(loadFeatureModel);
         file.add(loadProducts);
+        file.add(loadProductsFM);
         file.addSeparator();
         file.add(quit);
         add(file);
@@ -167,6 +171,10 @@ public class ViewMenuBar extends JMenuBar implements Observer {
 
     public JMenuItem getLoadProducts() {
         return loadProducts;
+    }
+    
+    public JMenuItem getLoadProductsFM() {
+        return loadProductsFM;
     }
 
     public List<JRadioButtonMenuItem> getGenerationTechniqueButtons() {

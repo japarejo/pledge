@@ -39,6 +39,7 @@ public class AdapterProducts extends AbstractListModel {
     public int getSize() {
         if (model.getProducts() != null) {
             return model.getProducts().size();
+
         }
         return 0;
     }
@@ -46,13 +47,18 @@ public class AdapterProducts extends AbstractListModel {
     @Override
     public Object getElementAt(int index) {
         if (model.getProducts() != null) {
-            Product p = model.getProducts().get(index);
-            String s = "P"+(index+1)+":";
-            for (Integer i : p)
-                if (i > 0)
-                    s+="    "+model.getFeaturesList().get(i -1);
-            return s;
-            //return "P"+(index+1)+"      " + model.getProducts().get(index);
+            if (model.getSolver() != null) {
+                Product p = model.getProducts().get(index);
+                String s = "P" + (index + 1) + ":";
+                for (Integer i : p) {
+                    if (i > 0) {
+                        s += "    " + model.getFeaturesList().get(i - 1);
+                    }
+                }
+                return s;
+            } else {
+                return "P" + (index + 1) + "      " + model.getProducts().get(index);
+            }
         }
         return null;
 

@@ -888,6 +888,47 @@ public class ModelPLEDGE extends Observable {
         setRunning(true);
         setIndeterminate(true);
         setGlobalAction(GLOBAL_ACTION_LOAD_PRODUCTS);
+        solver = null;
+        solverIterator = null;
+        featuresIntList = new ArrayList<Integer>();
+        featuresList = new ArrayList<String>();
+        namesToFeaturesInt = new HashMap<String, Integer>();
+        featureModelConstraints = new ArrayList<String>();
+        featureModelConstraintsString = new ArrayList<String>();
+        coreFeatures = new ArrayList<String>();
+        deadFeatures = new ArrayList<String>();
+        BufferedReader in = new BufferedReader(new FileReader(inFile));
+
+        products = new ArrayList<Product>();
+        String line;
+
+        while ((line = in.readLine()) != null) {
+            if (!line.contains(">")) {
+                Product p = new Product();
+                setCurrentAction("Extracting product number" + products.size());
+                StringTokenizer st = new StringTokenizer(line, ";");
+                while (st.hasMoreTokens()) {
+                    p.add(Integer.parseInt(st.nextToken()));
+                }
+                products.add(p);
+            } else {
+//                featuresList.add(line.substring(line.indexOf(">") + 1, line.length()));
+            }
+        }
+        setRunning(false);
+        setChanged();
+        notifyObservers(this);
+    }
+    
+    /**
+     * Load products from a file, after having loaded a FM that corresponds to the products.
+     * @param inFile the file to loead the products from.
+     * @throws Exception if an error occurs while reading the products file.
+     */
+    public void loadProductsFM(String inFile) throws Exception {
+        setRunning(true);
+        setIndeterminate(true);
+        setGlobalAction(GLOBAL_ACTION_LOAD_PRODUCTS);
 //        solver = null;
 //        solverIterator = null;
 //        featuresIntList = new ArrayList<Integer>();

@@ -52,6 +52,7 @@ import pledge.gui.controllers.ControllerGenerateProducts;
 import pledge.gui.controllers.ControllerGenerationTechnique;
 import pledge.gui.controllers.ControllerLoadFeatureModel;
 import pledge.gui.controllers.ControllerLoadProducts;
+import pledge.gui.controllers.ControllerLoadProductsFM;
 import pledge.gui.controllers.ControllerPrioritizationTechnique;
 import pledge.gui.controllers.ControllerPrioritizeProducts;
 import pledge.gui.controllers.ControllerQuit;
@@ -102,6 +103,7 @@ public class ViewPLEDGE extends JFrame implements Observer {
     private ControllerDisplayEditConstraints controllerDisplayEditConstraints;
     private ControllerCloseEditConstraints controllerCloseEditConstraints;
     private ControllerRemoveConstraint controllerRemoveConstraint;
+    private ControllerLoadProductsFM controllerLoadProductsFM;
     // Views
     private ViewMenuBar viewMenuBar;
     private ViewConstraints viewConstraints;
@@ -142,6 +144,7 @@ public class ViewPLEDGE extends JFrame implements Observer {
         controllerQuit = new ControllerQuit(model, this);
         controllerLoadFeatureModel = new ControllerLoadFeatureModel(model, this);
         controllerLoadProducts = new ControllerLoadProducts(model, this);
+        controllerLoadProductsFM = new ControllerLoadProductsFM(model, this);
         controllerDisplayAbout = new ControllerDisplayAbout(this);
         controllerCloseAbout = new ControllerCloseAbout(this);
         controllerViewConfigurationGeneration = new ControllerViewConfigurationGeneration(this);
@@ -158,6 +161,7 @@ public class ViewPLEDGE extends JFrame implements Observer {
         viewMenuBar.getQuit().addActionListener(controllerQuit);
         viewMenuBar.getLoadFeatureModel().addActionListener(controllerLoadFeatureModel);
         viewMenuBar.getLoadProducts().addActionListener(controllerLoadProducts);
+        viewMenuBar.getLoadProductsFM().addActionListener(controllerLoadProductsFM);
         viewMenuBar.getAbout().addActionListener(controllerDisplayAbout);
         viewMenuBar.getGenerate().addActionListener(controllerViewConfigurationGeneration);
         viewMenuBar.getSaveProducts().addActionListener(controllerSaveProducts);
