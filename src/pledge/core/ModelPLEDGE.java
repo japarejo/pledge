@@ -88,6 +88,13 @@ public class ModelPLEDGE extends Observable {
     private static final String DEAD_FEATURE = "Dead";
     private static final String FREE_FEATURE = "Free";
 
+    /**
+     * @param products the products to set
+     */
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
     public static enum FeatureModelFormat {
 
         SPLOT, DIMACS
@@ -454,7 +461,7 @@ public class ModelPLEDGE extends Observable {
         clean();
         featureModelName = new File(filePath).getName();
         featureModelName = featureModelName.substring(0, featureModelName.lastIndexOf("."));
-        products = null;
+        setProducts(null);
         fmPath = filePath;
         switch (format) {
 
@@ -692,7 +699,7 @@ public class ModelPLEDGE extends Observable {
         setRunning(true);
         setIndeterminate(false);
         setGlobalAction(GLOBAL_ACTION_GENERATING_PRODUCTS);
-        products = generationTechnique.generateProducts(this, nbProductsToGenerate, generationTimeMSAllowed, prioritizationTechnique);
+        setProducts(generationTechnique.generateProducts(this, nbProductsToGenerate, generationTimeMSAllowed, prioritizationTechnique));
         setRunning(false);
         setChanged();
         notifyObservers();
@@ -706,7 +713,7 @@ public class ModelPLEDGE extends Observable {
         setRunning(true);
         setIndeterminate(false);
         setGlobalAction(GLOBAL_ACTION_PRIORITIZING_PRODUCTS);
-        products = prioritizationTechnique.prioritize(this, products);
+        setProducts(prioritizationTechnique.prioritize(this, products));
         setRunning(false);
         setChanged();
         notifyObservers();
@@ -807,7 +814,7 @@ public class ModelPLEDGE extends Observable {
         List<Product> products = new ArrayList<Product>(count);
 
         while (products.size() < count) {
-
+            System.out.println("Generating the "+(products.size()+1)+"-th product!");
             try {
                 if (solverIterator.isSatisfiable()) {
                     Product product = toProduct(solverIterator.model());
@@ -899,7 +906,7 @@ public class ModelPLEDGE extends Observable {
         deadFeatures = new ArrayList<String>();
         BufferedReader in = new BufferedReader(new FileReader(inFile));
 
-        products = new ArrayList<Product>();
+        setProducts(new ArrayList<Product>());
         String line;
 
         while ((line = in.readLine()) != null) {
@@ -940,7 +947,7 @@ public class ModelPLEDGE extends Observable {
 //        deadFeatures = new ArrayList<String>();
         BufferedReader in = new BufferedReader(new FileReader(inFile));
 
-        products = new ArrayList<Product>();
+        setProducts(new ArrayList<Product>());
         String line;
 
         while ((line = in.readLine()) != null) {

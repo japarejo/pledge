@@ -19,9 +19,11 @@
  */
 package pledge;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pledge.core.ModelPLEDGE;
+import pledge.core.Product;
 import pledge.gui.GUI;
 
 /**
@@ -41,6 +43,7 @@ public class Main {
             if (args.length == 0) {
                 new GUI();
             } else {
+                //int nProducts=Integer.valueOf(args[args.length-1]);
                 CommandLineParser parser = new CommandLineParser(args, "PLEDGE");
                 try {
                     
@@ -54,8 +57,13 @@ public class Main {
                         }
                         model.setNbProductsToGenerate(parser.getCommandGenerate().nbProds);
                         model.setGenerationTimeMSAllowed(parser.getCommandGenerate().timeAllowed);
-                        model.generateProducts();
+                        //model.generateProducts();
+                        //model.saveProducts(parser.getCommandGenerate().outputFile);
+                        System.out.println("Generating random products:");
+                        List<Product> unpredictedProducts=model.getUnpredictableProducts(parser.getCommandGenerate().nbProds);
+                        model.setProducts(unpredictedProducts);
                         model.saveProducts(parser.getCommandGenerate().outputFile);
+                        
                     }
                 } catch (Exception e) {
                     parser.printUsage();
